@@ -1,0 +1,20 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Trained Model Artifacts
+*.joblib
+*.pkl
+models/*
+!models/.keep
+
+# Datasets
+data/*
+!data/.keep
+*.csv
+
+# Virtual Environments
+venv/
+env/
+.env
