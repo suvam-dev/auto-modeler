@@ -106,6 +106,15 @@ class QuickModel:
         X = df.drop(columns=[self.target_col])
         y = df[self.target_col]
 
+        # 2b. Validate target type against model type
+        is_regressor = self.model_type in ['linear_reg', 'random_forest_reg']
+        if is_regressor and (y.dtype == 'object' or pd.api.types.is_string_dtype(y) or isinstance(y.dtype, pd.CategoricalDtype)):
+            raise ValueError(
+                f"Target column '{self.target_col}' contains text/categories (e.g., '{y.iloc[0]}'), "
+                f"but you are using a Regressor ('{self.model_type}'). "
+                f"Please change model_type to a Classifier (e.g., 'random_forest_clf' or 'logistic_reg')."
+            )
+
         # Cast bool target (True/False) to int so classifiers receive 0/1
         if y.dtype == bool:
             y = y.astype(int)
