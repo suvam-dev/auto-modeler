@@ -7,13 +7,13 @@ A streamlined, robust wrapper around `pandas` and `scikit-learn` for rapid ML pr
 ### From GitHub (use in any project)
 
 ```bash
-pip install git+https://github.com/suvanghosh/auto-modeler.git
+pip install git+https://github.com/suvam-dev/auto-modeler.git
 ```
 
 ### Local / development
 
 ```bash
-git clone https://github.com/suvanghosh/auto-modeler.git
+git clone https://github.com/suvam-dev/auto-modeler.git
 cd auto-modeler
 pip install -e .
 ```
