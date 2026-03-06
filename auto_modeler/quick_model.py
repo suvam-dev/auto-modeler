@@ -57,7 +57,7 @@ class QuickModel:
             X[bool_cols] = X[bool_cols].astype(int)
 
         numeric_features = X.select_dtypes(include=['int64', 'float64', 'int32', 'uint8']).columns
-        categorical_features = X.select_dtypes(include=['object', 'category']).columns
+        categorical_features = X.select_dtypes(include=['str', 'object', 'category']).columns
 
         # Determine imputation strategy based on user input
         impute_strategy = self.nan_strategy if self.nan_strategy != 'drop' else 'median'

@@ -3,18 +3,21 @@ __pycache__/
 *.py[cod]
 *$py.class
 
-# Trained Model Artifacts
+# Trained model artifacts (don't commit these)
 *.joblib
 *.pkl
-models/*
-!models/.keep
 
-# Datasets
-data/*
-!data/.keep
+# Datasets (don't commit raw data)
 *.csv
 
-# Virtual Environments
+# Python packaging
+*.egg-info/
+dist/
+build/
+.eggs/
+
+# Virtual environments
 venv/
+.venv/
 env/
 .env
