@@ -136,6 +136,9 @@ class QuickModel:
         """Serializes the trained pipeline to disk."""
         if self.pipeline is None:
             raise Exception("No model to save.")
+            
+        import os
+        os.makedirs(os.path.dirname(filepath), exist_ok=True)
         joblib.dump(self.pipeline, filepath)
         print(f"Model saved securely to {filepath}")
         
