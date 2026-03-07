@@ -218,6 +218,42 @@ class QuickModel:
         new_df = pd.read_csv(new_data_csv_path)
         return self.pipeline.predict(new_df)
 
+    def predict_and_save(self, test_csv_path: str, output_csv_path: str, output_target_col: str = None):
+        """
+        🚀 Runs predictions on a test CSV and saves the results to a new file.
+        
+        Loads the test data, generates predictions, appends them as a new 
+        column to the data, and saves the combined result to `output_csv_path`.
+        
+        Args:
+            test_csv_path     (str): Filepath to the raw CSV data to predict on.
+            output_csv_path   (str): Destination filepath for the resulting CSV.
+            output_target_col (str): The name to give the new prediction column. 
+                                     If None, defaults to the original target_col 
+                                     used during training.
+        """
+        print(f"Generating predictions for {test_csv_path}...")
+        
+        # Load the test data
+        test_df = pd.read_csv(test_csv_path)
+        
+        # Get predictions (using the existing predict method)
+        predictions = self.predict(test_csv_path)
+        
+        # Determine the column name for the predictions
+        col_name = output_target_col if output_target_col else self.target_col
+        if not col_name:
+            col_name = 'Prediction' # Fallback if target_col wasn't set somehow
+            
+        # Add predictions to the dataframe
+        test_df[col_name] = predictions
+        
+        # Save to the new CSV file
+        import os
+        os.makedirs(os.path.dirname(output_csv_path) or '.', exist_ok=True)
+        test_df.to_csv(output_csv_path, index=False)
+        print(f"✅ Predictions saved successfully to {output_csv_path}")
+
     def save_model(self, filepath: str):
         """
         💾 Serializes the entire trained pipeline to disk securely.
