@@ -10,26 +10,51 @@ from sklearn.linear_model import LinearRegression, LogisticRegression
 
 class QuickModel:
     """
-    A unified wrapper for automating pandas preprocessing and scikit-learn model training.
-    """
+    ===========================================================================
+    🤖 QuickModel: The Automated Machine Learning Engine
+    ===========================================================================
     
+    A unified, high-level wrapper designed to automate pandas preprocessing 
+    and scikit-learn model training into a seamless, robust pipeline.
+    
+    Features:
+        • Automatic data-type detection & missing value imputation
+        • Data leakage prevention via strict scikit-learn Pipelines
+        • Direct `.joblib` model artifact serialization
+    """
     def __init__(self, model_type: str = 'random_forest_reg', nan_strategy: str = 'median'):
         """
-        Initializes the model configuration.
+        ⚡ Initializes the ML engine configuration.
         
         Args:
-            model_type (str): The algorithm to use. 
-                              Options: 'linear_reg', 'logistic_reg', 'random_forest_reg', 'random_forest_clf'.
-            nan_strategy (str): How to handle missing values. 
-                                Options: 'drop', 'mean', 'median', 'most_frequent', 'constant'.
+            model_type   (str): The underlying scikit-learn estimator algorithm. 
+                                [Supported: 'linear_reg', 'logistic_reg', 
+                                 'binary_clf', 'random_forest_reg', 'random_forest_clf']
+            nan_strategy (str): The strategy for handling missing values (NaNs). 
+                                [Supported: 'drop', 'mean', 'median', 
+                                 'most_frequent', 'constant']
         """
         self.model_type = model_type
         self.nan_strategy = nan_strategy
         self.pipeline = None
         self.target_col = None
 
+
+
+
     def _get_estimator(self):
-        """Maps the string model_type to the actual scikit-learn model object."""
+        """
+        🧠 Instantiates the core Machine Learning algorithm.
+        
+        This private method acts as a factory, mapping the user-provided 
+        `model_type` string to its corresponding scikit-learn class.
+        
+        Returns:
+            estimator: An un-fitted scikit-learn model object.
+            
+        Raises:
+            ValueError: If the `model_type` is not in the supported dictionary.
+        """
         models = {
             'linear_reg': LinearRegression(),
             'logistic_reg': LogisticRegression(max_iter=1000),
@@ -45,10 +70,15 @@ class QuickModel:
 
     def _build_preprocessor(self, X: pd.DataFrame) -> ColumnTransformer:
         """
-        Dynamically detects column types and builds a preprocessing pipeline.
-        Numeric columns get imputed and scaled.
-        Categorical columns get imputed and one-hot encoded.
-        Boolean columns are cast to int (1/0) and treated as numeric.
+        🛠️ Dynamically constructs a preprocessing graph based on column dtypes.
+        
+        Logic mapping:
+          • Numeric data  -> Imputation + StandardScaler
+          • Categorical   -> Imputation + OneHotEncoder
+          • Boolean       -> Cast to Integer (0/1) + treated as numeric
+        
+        Returns:
+            ColumnTransformer: The compiled preprocessor node ready for fitting.
         """
         # Cast bool columns to int so sklearn doesn't trip on True/False dtype
         bool_cols = X.select_dtypes(include='bool').columns
@@ -83,11 +113,18 @@ class QuickModel:
 
     def train(self, csv_path: str, target_col: str):
         """
-        Loads CSV data, applies NaN strategies, builds the pipeline, and trains the model.
+        🚀 The main execution engine for training the model.
+        
+        This method handles:
+            1. Loading data directly from disk via pandas
+            2. Dropping NaN rows natively (if requested via `nan_strategy`)
+            3. Type-validating the target column against the model type
+            4. Constructing the sklearn Pipeline graph
+            5. Fitting the Pipeline to the historical data
         
         Args:
-            csv_path (str): The file path to the training CSV data.
-            target_col (str): The name of the column to predict.
+            csv_path   (str): The absolute or relative filepath to the training CSV.
+            target_col (str): The exact name of the column you are trying to predict.
         """
         self.target_col = target_col
         print(f"Loading data from {csv_path}...")
@@ -134,7 +171,23 @@ class QuickModel:
         print("Training complete! Model is ready for predictions.")
 
     def predict(self, new_data_csv_path: str) -> np.ndarray:
-        """Loads new CSV data and generates predictions."""
+        """
+        🔮 Generates predictions on unseen data.
+        
+        Loads a new CSV file and automatically pushes it through the exact 
+        preprocessing graph (imputers, scalers, encoders) that was fit during 
+        training, before calling `.predict()` on the underlying model.
+        
+        Args:
+            new_data_csv_path (str): Filepath to the raw CSV data to predict on.
+            
+        Returns:
+            np.ndarray: An array of predictions (floats for Regressors, 
+                        classes/ints for Classifiers).
+                        
+        Raises:
+            Exception: If the pipeline has not been trained yet.
+        """
         if self.pipeline is None:
             raise Exception("Model not trained. Call train() first.")
             
@@ -142,7 +195,16 @@ class QuickModel:
         return self.pipeline.predict(new_df)
 
     def save_model(self, filepath: str):
-        """Serializes the trained pipeline to disk."""
+        """
+        💾 Serializes the entire trained pipeline to disk securely.
+        
+        Automatically creates any missing parent directories in the filepath 
+        and dumps the complete scikit-learn Pipeline (preprocessing + model) 
+        using `joblib`.
+        
+        Args:
+            filepath (str): The desired save path (e.g., 'saved_models/my_model.joblib').
+        """
         if self.pipeline is None:
             raise Exception("No model to save.")
             
@@ -152,32 +214,39 @@ class QuickModel:
         print(f"Model saved securely to {filepath}")
         
     def load_model(self, filepath: str):
-        """Loads a previously saved pipeline from disk."""
+        """
+        📂 Loads a previously saved pipeline from disk.
+        
+        Restores the full state of the model and preprocessors, attaching 
+        them back to this `QuickModel` instance for immediate `.predict()` use.
+        
+        Args:
+            filepath (str): Path to the existing .joblib file.
+        """
         self.pipeline = joblib.load(filepath)
         print(f"Model loaded from {filepath}")
 
     def run(self, csv_path: str, target_col: str, save_path: str) -> 'QuickModel':
         """
-        Super-function: trains the model on *csv_path* and saves it to *save_path*
-        in one call.  Returns `self` so the instance can be used immediately.
+        ✨ Super-function: End-to-end model creation in a single, fluent call.
+        
+        This method initializes, builds, trains on *csv_path*, and saves the 
+        final artifact to *save_path*. It returns `self`, enabling method chaining.
 
         Args:
-            csv_path  (str): Path to the training CSV file.
+            csv_path   (str): Path to the historical training dataset (.csv).
             target_col (str): Name of the column to predict.
-            save_path  (str): Destination path for the saved model artifact
-                              (e.g. 'models/revenue_model.joblib').
+            save_path  (str): Destination filepath for the saved .joblib model 
+                              (e.g., 'models/revenue_model.joblib').
 
         Returns:
-            QuickModel: The trained instance (for optional method chaining).
+            QuickModel: The trained ML engine instance (ready for .predict()).
 
         Example::
 
-            model = QuickModel(model_type='random_forest_reg', nan_strategy='median')
-            model.run('data/my_data.csv', target_col='revenue', save_path='models/revenue_model.joblib')
-
-            # — or in one line —
-            model = run_quick_model('data/my_data.csv', target_col='revenue',
-                                    save_path='models/revenue_model.joblib')
+            # Initialize and run via instance
+            model = QuickModel(model_type='binary_clf', nan_strategy='median')
+            model.run('data/churn.csv', target_col='client_lost', save_path='models/churn.joblib')
         """
         self.train(csv_path=csv_path, target_col=target_col)
         self.save_model(filepath=save_path)
@@ -196,7 +265,12 @@ def run_quick_model(
     nan_strategy: str = 'median',
 ) -> QuickModel:
     """
-    One-liner super-function: initialises, trains, and saves a model.
+    ===========================================================================
+    🎁 run_quick_model: The One-Liner Wrapper
+    ===========================================================================
+    
+    A functional interface for the fastest possible path to a trained model.
+    Initializes a QuickModel, trains it, and saves it—all in a single function call.
 
     Args:
         csv_path    (str): Path to the training CSV file.
