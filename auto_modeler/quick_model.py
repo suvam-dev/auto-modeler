@@ -224,7 +224,14 @@ class QuickModel:
         new_df = pd.read_csv(new_data_csv_path)
         return self.pipeline.predict(new_df)
 
-    def predict_and_save(self, test_csv_path: str, output_csv_path: str, output_target_col: str = None):
+    def predict_and_save(
+        self, 
+        test_csv_path: str, 
+        output_csv_path: str, 
+        output_target_col: str = None,
+        id_col: str = None,
+        transform_func: callable = None
+    ):
         """
         🚀 Runs predictions on a test CSV and saves the results to a new file.
         
@@ -237,6 +244,10 @@ class QuickModel:
             output_target_col (str): The name to give the new prediction column. 
                                      If None, defaults to the original target_col 
                                      used during training.
+            id_col            (str): If provided, ONLY this column and the prediction 
+                                     column will be saved (Kaggle submission format).
+            transform_func (callable): A function applied to predictions before saving 
+                                       (e.g., np.expm1 for log-transformed targets).
         """
         print(f"Generating predictions for {test_csv_path}...")
         
@@ -246,6 +257,10 @@ class QuickModel:
         # Get predictions (using the existing predict method)
         predictions = self.predict(test_csv_path)
         
+        # Apply transformation if provided
+        if transform_func is not None:
+            predictions = transform_func(predictions)
+        
         # Determine the column name for the predictions
         col_name = output_target_col if output_target_col else self.target_col
         if not col_name:
@@ -253,11 +268,19 @@ class QuickModel:
             
         # Add predictions to the dataframe
         test_df[col_name] = predictions
+
+        # Filter to just ID and Prediction if requested
+        if id_col:
+            if id_col not in test_df.columns:
+                raise ValueError(f"ID column '{id_col}' not found in {test_csv_path}")
+            save_df = test_df[[id_col, col_name]]
+        else:
+            save_df = test_df
         
         # Save to the new CSV file
         import os
         os.makedirs(os.path.dirname(output_csv_path) or '.', exist_ok=True)
-        test_df.to_csv(output_csv_path, index=False)
+        save_df.to_csv(output_csv_path, index=False)
         print(f"✅ Predictions saved successfully to {output_csv_path}")
 
     def save_model(self, filepath: str):
