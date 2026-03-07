@@ -111,7 +111,7 @@ class QuickModel:
                 ('cat', categorical_transformer, categorical_features)
             ])
 
-    def train(self, csv_path: str, target_col: str):
+    def train(self, csv_path: str, target_col: str, max_samples: int = None):
         """
         🚀 The main execution engine for training the model.
         
@@ -123,12 +123,18 @@ class QuickModel:
             5. Fitting the Pipeline to the historical data
         
         Args:
-            csv_path   (str): The absolute or relative filepath to the training CSV.
-            target_col (str): The exact name of the column you are trying to predict.
+            csv_path    (str): The absolute or relative filepath to the training CSV.
+            target_col  (str): The exact name of the column you are trying to predict.
+            max_samples (int): Max number of rows to train on. Selects randomly if exceeded.
         """
         self.target_col = target_col
         print(f"Loading data from {csv_path}...")
         df = pd.read_csv(csv_path)
+
+        # 0. Chop data if max_samples is provided
+        if max_samples is not None and len(df) > max_samples:
+            print(f"Dataset too large ({len(df)} rows). Randomly sampling down to {max_samples} rows...")
+            df = df.sample(n=max_samples, random_state=42).reset_index(drop=True)
 
         # 1. Handle 'drop' strategy at the pandas DataFrame level
         if self.nan_strategy == 'drop':
@@ -286,7 +292,7 @@ class QuickModel:
         self.pipeline = joblib.load(filepath)
         print(f"Model loaded from {filepath}")
 
-    def run(self, csv_path: str, target_col: str, save_path: str) -> 'QuickModel':
+    def run(self, csv_path: str, target_col: str, save_path: str, max_samples: int = None) -> 'QuickModel':
         """
         ✨ Super-function: End-to-end model creation in a single, fluent call.
         
@@ -294,10 +300,11 @@ class QuickModel:
         final artifact to *save_path*. It returns `self`, enabling method chaining.
 
         Args:
-            csv_path   (str): Path to the historical training dataset (.csv).
-            target_col (str): Name of the column to predict.
-            save_path  (str): Destination filepath for the saved .joblib model 
-                              (e.g., 'models/revenue_model.joblib').
+            csv_path    (str): Path to the historical training dataset (.csv).
+            target_col  (str): Name of the column to predict.
+            save_path   (str): Destination filepath for the saved .joblib model 
+                               (e.g., 'models/revenue_model.joblib').
+            max_samples (int): Max number of rows to train on.
 
         Returns:
             QuickModel: The trained ML engine instance (ready for .predict()).
@@ -308,7 +315,7 @@ class QuickModel:
             model = QuickModel(model_type='binary_clf', nan_strategy='median')
             model.run('data/churn.csv', target_col='client_lost', save_path='models/churn.joblib')
         """
-        self.train(csv_path=csv_path, target_col=target_col)
+        self.train(csv_path=csv_path, target_col=target_col, max_samples=max_samples)
         self.save_model(filepath=save_path)
         return self
 
@@ -323,6 +330,7 @@ def run_quick_model(
     save_path: str,
     model_type: str = 'random_forest_reg',
     nan_strategy: str = 'median',
+    max_samples: int = None,
 ) -> QuickModel:
     """
     ===========================================================================
@@ -333,11 +341,12 @@ def run_quick_model(
     Initializes a QuickModel, trains it, and saves it—all in a single function call.
 
     Args:
-        csv_path    (str): Path to the training CSV file.
-        target_col  (str): Name of the column to predict.
-        save_path   (str): Destination path for the saved model artifact.
-        model_type  (str): Algorithm to use (default: 'random_forest_reg').
+        csv_path     (str): Path to the training CSV file.
+        target_col   (str): Name of the column to predict.
+        save_path    (str): Destination path for the saved model artifact.
+        model_type   (str): Algorithm to use (default: 'random_forest_reg').
         nan_strategy (str): Missing-value strategy (default: 'median').
+        max_samples  (int): Max number of rows to train on. Selects randomly if exceeded.
 
     Returns:
         QuickModel: The fully trained instance.
@@ -350,7 +359,8 @@ def run_quick_model(
             csv_path='data/my_data.csv',
             target_col='revenue',
             save_path='models/revenue_model.joblib',
+            max_samples=10000,
         )
     """
     model = QuickModel(model_type=model_type, nan_strategy=nan_strategy)
-    return model.run(csv_path=csv_path, target_col=target_col, save_path=save_path)
+    return model.run(csv_path=csv_path, target_col=target_col, save_path=save_path, max_samples=max_samples)
