@@ -143,20 +143,26 @@ class QuickModel:
         X = df.drop(columns=[self.target_col])
         y = df[self.target_col]
 
-        # 2b. Map common boolean-like string targets (Yes/No, True/False) to 1/0
+        # 2b. Map binary string targets to 1/0
         if y.dtype == 'object' or pd.api.types.is_string_dtype(y):
             clean_y = y.dropna().astype(str).str.lower()
-            unique_vals = set(clean_y.unique())
+            unique_vals = list(set(clean_y.unique()))
             
             mapping = None
-            if unique_vals <= {'true', 'false'}:
-                mapping = {'true': 1, 'false': 0}
-            elif unique_vals <= {'yes', 'no'}:
-                mapping = {'yes': 1, 'no': 0}
-            elif unique_vals <= {'y', 'n'}:
-                mapping = {'y': 1, 'n': 0}
-            elif unique_vals <= {'t', 'f'}:
-                mapping = {'t': 1, 'f': 0}
+            if len(unique_vals) == 2:
+                # If it's a known boolean pair, map explicitly for predictability
+                if set(unique_vals) == {'true', 'false'}:
+                    mapping = {'true': 1, 'false': 0}
+                elif set(unique_vals) == {'yes', 'no'}:
+                    mapping = {'yes': 1, 'no': 0}
+                elif set(unique_vals) == {'y', 'n'}:
+                    mapping = {'y': 1, 'n': 0}
+                elif set(unique_vals) == {'t', 'f'}:
+                    mapping = {'t': 1, 'f': 0}
+                else:
+                    # Otherwise, arbitrarily map the two unique values to 0 and 1
+                    mapping = {unique_vals[0]: 0, unique_vals[1]: 1}
+                    print(f"Auto-mapped binary target '{self.target_col}': {unique_vals[0]} -> 0, {unique_vals[1]} -> 1")
                 
             if mapping:
                 y = clean_y.map(mapping).reindex(y.index)
