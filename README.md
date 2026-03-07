@@ -69,23 +69,24 @@ model.run('path/to/data.csv', target_col='target', save_path='path/to/save/model
 
 ### `QuickModel` methods
 
-| Method                                  | Description                                            |
-| --------------------------------------- | ------------------------------------------------------ |
-| `.train(csv_path, target_col)`          | Loads CSV, builds preprocessor, fits the model         |
-| `.run(csv_path, target_col, save_path)` | `train()` + `save_model()` in one call. Returns `self` |
-| `.predict(new_data_csv_path)`           | Runs predictions on a new CSV. Returns a NumPy array   |
-| `.save_model(filepath)`                 | Serialises the trained pipeline to disk                |
-| `.load_model(filepath)`                 | Loads a previously saved pipeline from disk            |
+| Method                                              | Description                                            |
+| --------------------------------------------------- | ------------------------------------------------------ |
+| `.train(csv_path, target_col)`                      | Loads CSV, builds preprocessor, fits the model         |
+| `.run(csv_path, target_col, save_path)`             | `train()` + `save_model()` in one call. Returns `self` |
+| `.predict(new_data_csv_path)`                       | Runs predictions on a new CSV. Returns a NumPy array   |
+| `.predict_and_save(test_csv_path, output_csv_path)` | Predicts on a new CSV and saves results to a new file  |
+| `.save_model(filepath)`                             | Serialises the trained pipeline to disk                |
+| `.load_model(filepath)`                             | Loads a previously saved pipeline from disk            |
 
 ### `model_type` options
 
-| Value                 | Algorithm                | Use for                    |
-| --------------------- | ------------------------ | -------------------------- |
-| `'binary_clf'`        | Logistic Regression      | **True / False labels**    |
-| `'random_forest_clf'` | Random Forest Classifier | Multi-class classification |
-| `'random_forest_reg'` | Random Forest Regressor  | Continuous values          |
-| `'linear_reg'`        | Linear Regression        | Continuous values          |
-| `'logistic_reg'`      | Logistic Regression      | Multi-class classification |
+| Value                 | Algorithm                | Use for                                                         |
+| --------------------- | ------------------------ | --------------------------------------------------------------- |
+| `'binary_clf'`        | Logistic Regression      | **Binary labels** (Auto-parses True/False, Yes/No, Y/N strings) |
+| `'random_forest_clf'` | Random Forest Classifier | Multi-class classification                                      |
+| `'random_forest_reg'` | Random Forest Regressor  | Continuous values                                               |
+| `'linear_reg'`        | Linear Regression        | Continuous values                                               |
+| `'logistic_reg'`      | Logistic Regression      | Multi-class classification                                      |
 
 ### `nan_strategy` options
 
