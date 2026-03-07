@@ -101,7 +101,7 @@ class QuickModel:
         # Categorical Pipeline: Impute -> Encode
         categorical_transformer = Pipeline(steps=[
             ('imputer', SimpleImputer(strategy='most_frequent')),
-            ('onehot', OneHotEncoder(handle_unknown='ignore'))
+            ('onehot', OneHotEncoder(handle_unknown='ignore', max_categories=100, sparse_output=False))
         ])
 
         # Combine into a single transformer
@@ -269,7 +269,7 @@ class QuickModel:
             raise Exception("No model to save.")
             
         import os
-        os.makedirs(os.path.dirname(filepath), exist_ok=True)
+        os.makedirs(os.path.dirname(filepath) or '.', exist_ok=True)
         joblib.dump(self.pipeline, filepath)
         print(f"Model saved securely to {filepath}")
         
