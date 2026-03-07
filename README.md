@@ -7,7 +7,7 @@ A streamlined, robust wrapper around `pandas` and `scikit-learn` for rapid ML pr
 ### From GitHub (use in any project)
 
 ```bash
-pip install git+https://github.com/suvam-dev/auto-modeler.git
+pip3 install git+https://github.com/suvam-dev/auto-modeler.git
 ```
 
 ### Local / development
@@ -15,7 +15,7 @@ pip install git+https://github.com/suvam-dev/auto-modeler.git
 ```bash
 git clone https://github.com/suvam-dev/auto-modeler.git
 cd auto-modeler
-pip install -e .
+pip3 install -e .
 ```
 
 ---
@@ -28,9 +28,9 @@ pip install -e .
 from auto_modeler import run_quick_model
 
 model = run_quick_model(
-    csv_path='data/train.csv',
-    target_col='revenue',
-    save_path='models/revenue_model.joblib',
+    csv_path='path/to/data.csv',
+    target_col='target',
+    save_path='path/to/save/model.joblib',
     model_type='random_forest_reg',   # default
     nan_strategy='median',            # default
 )
@@ -42,15 +42,15 @@ model = run_quick_model(
 from auto_modeler import QuickModel
 
 model = QuickModel(model_type='random_forest_reg', nan_strategy='median')
-model.train(csv_path='data/train.csv', target_col='revenue')
-model.save_model('models/revenue_model.joblib')
+model.train(csv_path='path/to/data.csv', target_col='target')
+model.save_model('path/to/save/model.joblib')
 ```
 
 Or via the `run()` method:
 
 ```python
 model = QuickModel(model_type='binary_clf')
-model.run('data/churn.csv', target_col='churned', save_path='models/churn.joblib')
+model.run('path/to/data.csv', target_col='target', save_path='path/to/save/model.joblib')
 ```
 
 ---
