@@ -70,14 +70,14 @@ model.run('path/to/data.csv', target_col='target', save_path='path/to/save/model
 
 ### `QuickModel` methods
 
-| Method                                               | Description                                                |
-| ---------------------------------------------------- | ---------------------------------------------------------- |
-| `.train(csv_path, target_col, max_samples)`          | Loads CSV, builds preprocessor, fits the model             |
-| `.run(csv_path, target_col, save_path, max_samples)` | `train()` + `save_model()` in one call. Returns `self`     |
-| `.predict(new_data_csv_path)`                        | Runs predictions on a new CSV. Returns a NumPy array       |
-| `.predict_and_save(...)`                             | Predicts and saves. Supports `id_col` and `transform_func` |
-| `.save_model(filepath)`                              | Serialises the trained pipeline to disk                    |
-| `.load_model(filepath)`                              | Loads a previously saved pipeline from disk                |
+| Method                                               | Description                                                   |
+| ---------------------------------------------------- | ------------------------------------------------------------- |
+| `.train(csv_path, target_col, max_samples)`          | Loads CSV, builds preprocessor, fits the model                |
+| `.run(csv_path, target_col, save_path, max_samples)` | `train()` + `save_model()` in one call. Returns `self`        |
+| `.predict(new_data_csv_path)`                        | Runs predictions on a new CSV. Returns a NumPy array          |
+| `.predict_and_save(...)`                             | Predicts and saves. Supports `keep_cols` and `transform_func` |
+| `.save_model(filepath)`                              | Serialises the trained pipeline to disk                       |
+| `.load_model(filepath)`                              | Loads a previously saved pipeline from disk                   |
 
 ### `model_type` options
 

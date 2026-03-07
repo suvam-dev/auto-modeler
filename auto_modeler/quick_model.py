@@ -229,7 +229,7 @@ class QuickModel:
         test_csv_path: str, 
         output_csv_path: str, 
         output_target_col: str = None,
-        id_col: str = None,
+        keep_cols=None,
         transform_func: callable = None
     ):
         """
@@ -244,8 +244,8 @@ class QuickModel:
             output_target_col (str): The name to give the new prediction column. 
                                      If None, defaults to the original target_col 
                                      used during training.
-            id_col            (str): If provided, ONLY this column and the prediction 
-                                     column will be saved (Kaggle submission format).
+            keep_cols (str or list): If provided, ONLY these columns and the prediction 
+                                     column will be saved.
             transform_func (callable): A function applied to predictions before saving 
                                        (e.g., np.expm1 for log-transformed targets).
         """
@@ -269,11 +269,16 @@ class QuickModel:
         # Add predictions to the dataframe
         test_df[col_name] = predictions
 
-        # Filter to just ID and Prediction if requested
-        if id_col:
-            if id_col not in test_df.columns:
-                raise ValueError(f"ID column '{id_col}' not found in {test_csv_path}")
-            save_df = test_df[[id_col, col_name]]
+        # Filter to just keep_cols and Prediction if requested
+        if keep_cols is not None:
+            if isinstance(keep_cols, str):
+                keep_cols = [keep_cols]
+                
+            missing_cols = [c for c in keep_cols if c not in test_df.columns]
+            if missing_cols:
+                raise ValueError(f"Columns {missing_cols} not found in {test_csv_path}")
+                
+            save_df = test_df[list(keep_cols) + [col_name]]
         else:
             save_df = test_df
         
