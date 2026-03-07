@@ -143,7 +143,29 @@ class QuickModel:
         X = df.drop(columns=[self.target_col])
         y = df[self.target_col]
 
-        # 2b. Validate target type against model type
+        # 2b. Map common boolean-like string targets (Yes/No, True/False) to 1/0
+        if y.dtype == 'object' or pd.api.types.is_string_dtype(y):
+            clean_y = y.dropna().astype(str).str.lower()
+            unique_vals = set(clean_y.unique())
+            
+            mapping = None
+            if unique_vals <= {'true', 'false'}:
+                mapping = {'true': 1, 'false': 0}
+            elif unique_vals <= {'yes', 'no'}:
+                mapping = {'yes': 1, 'no': 0}
+            elif unique_vals <= {'y', 'n'}:
+                mapping = {'y': 1, 'n': 0}
+            elif unique_vals <= {'t', 'f'}:
+                mapping = {'t': 1, 'f': 0}
+                
+            if mapping:
+                y = clean_y.map(mapping).reindex(y.index)
+
+        # Cast bool target (True/False) to int so classifiers receive 0/1
+        if y.dtype == bool:
+            y = y.astype(int)
+
+        # 2c. Validate target type against model type
         is_regressor = self.model_type in ['linear_reg', 'random_forest_reg']
         if is_regressor and (y.dtype == 'object' or pd.api.types.is_string_dtype(y) or isinstance(y.dtype, pd.CategoricalDtype)):
             raise ValueError(
@@ -151,10 +173,6 @@ class QuickModel:
                 f"but you are using a Regressor ('{self.model_type}'). "
                 f"Please change model_type to a Classifier (e.g., 'random_forest_clf' or 'logistic_reg')."
             )
-
-        # Cast bool target (True/False) to int so classifiers receive 0/1
-        if y.dtype == bool:
-            y = y.astype(int)
 
         # 3. Construct the full pipeline
         preprocessor = self._build_preprocessor(X)
