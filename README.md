@@ -79,6 +79,16 @@ model.run('path/to/data.csv', target_col='target', save_path='path/to/save/model
 | `.save_model(filepath)`                              | Serialises the trained pipeline to disk                       |
 | `.load_model(filepath)`                              | Loads a previously saved pipeline from disk                   |
 
+#### `predict_and_save` arguments
+
+| Parameter           | Type                 | Default | Description                                                                                 |
+| ------------------- | -------------------- | ------- | ------------------------------------------------------------------------------------------- |
+| `test_csv_path`     | `str`                | —       | Filepath to the raw CSV data to predict on.                                                 |
+| `output_csv_path`   | `str`                | —       | Destination filepath for the saved CSV.                                                     |
+| `output_target_col` | `str`                | `None`  | Name to give the prediction column. If None, uses training `target_col`.                    |
+| `keep_cols`         | `str` or `list[str]` | `None`  | Output formatting. If provided, _only_ these columns are retained alongside the prediction. |
+| `transform_func`    | `callable`           | `None`  | Applies a function to predictions before saving (e.g. `np.expm1`).                          |
+
 ### `model_type` options
 
 | Value                 | Algorithm                | Use for                                                         |
